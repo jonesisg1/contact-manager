@@ -25,10 +25,4 @@ export class App {
 
     this.router = router;
   }
-  /*
-  navToContact(contact){
-    this.router.navigateToRoute('contacts', { id: contact.id })
-  }
-*/
-
 }
