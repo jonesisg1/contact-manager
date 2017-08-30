@@ -1,5 +1,6 @@
 # contact-manager
 Aurelia contact manager tutorial continued
+
 The following functionality has been added:
 1) Add a contact.
 2) Delete a contact.
