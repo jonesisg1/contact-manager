@@ -1,0 +1,22 @@
+<template>
+  <div class="contact-list">
+    <ul class="list-group">
+      <li repeat.for="contact of contacts" class="list-group-item ${contact.id === $parent.selectedId ? 'active' : ''}">
+        <div class="row">
+          <div class="col-md-8">
+            <a route-href="route: contacts; params.bind: {id:contact.id}" click.delegate="$parent.select(contact)">
+              <h4 class="list-group-item-heading">${contact.firstName} ${contact.lastName}</h4>
+              <p class="list-group-item-text">${contact.email}</p>
+            </a>
+          </div>
+          <div class="col-md-4 text-right">
+            <a route-href="route: none" click.delegate="$parent.deleteContact(contact)">
+              <i class="glyphicon glyphicon-remove-circle"> 
+              <span class="sr-only">Delete</span>
+            </a>
+          </div>
+        </div>
+      </li>
+    </ul>
+  </div>
+</template>
