@@ -1,5 +1,6 @@
 <template>
 <!--
+  == ij170910 Added Undo button
   == ij170901 Changed column distribution between labels and inputs.
   == ij170830 Added validation bindings to firstName, lastName and email.
   -->
@@ -51,6 +52,7 @@
   </div>
 
   <div class="button-bar">
-    <button class="btn btn-success" click.delegate="save()" disabled.bind="!canSave">Save</button>
+    <button class="btn btn-success" click.delegate="save()" disabled.bind="!canSave"><i class="glyphicon glyphicon-ok-sign"></i>  Save</button>
+    <button class="btn" click.delegate="undo()" disabled.bind="changed"><i class="glyphicon glyphicon-trash"></i>  Undo</button>
   </div>
 </template>

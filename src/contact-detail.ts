@@ -1,6 +1,7 @@
 /*
-  IJ170831 - Changed the contact interface to a class.
-           - Using destructured parameters in the constructor keeps things tidy :) 
+ *  IJ170910 Added undo and changed methods.  
+ *  IJ170831 Changed the contact interface to a class.
+ *         - Using destructured parameters in the constructor keeps things tidy :) 
 */
 import {inject, NewInstance} from 'aurelia-framework';
 import {EventAggregator} from 'aurelia-event-aggregator';
@@ -55,6 +56,15 @@ export class ContactDetail {
     return this.contact.firstName && this.contact.lastName && !this.api.isRequesting && !this.valCtl.errors.length;
   }
 
+  get changed() {
+    return areEqual(this.originalContact, this.contact);
+  }
+
+  undo() {
+    this.contact = this.originalContact.clone(); // Remember we want a different object!
+    this.valCtl.reset(); // Assume the original state was valid.
+  }
+  
   save() {
     this.api.saveContact(this.contact).then(contact => {
       this.contact = new Contact(contact);
