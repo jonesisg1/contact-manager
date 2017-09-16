@@ -1,6 +1,7 @@
 <template>
 <!--
-  == ij170910 Added Undo button
+  == IJ170916 Added enetity validation.
+  == ij170910 Added Undo button.
   == ij170901 Changed column distribution between labels and inputs.
   == ij170830 Added validation bindings to firstName, lastName and email.
   -->
@@ -33,7 +34,7 @@
         <div class="form-group" validation-errors.bind="emailErrors" class.bind="emailErrors.length ? 'has-error' : ''">
           <label class="col-sm-3 control-label">Email</label>
           <div class="col-sm-9">
-            <input type="text" placeholder="email" class="form-control" value.bind="contact.email & validate">
+            <input type="text" placeholder="email" class="form-control re-validate" value.bind="contact.email & validate">
             <span class="help-block" repeat.for="errorInfo of emailErrors">
               ${errorInfo.error.message}
             </span>          
@@ -43,7 +44,15 @@
         <div class="form-group">
           <label class="col-sm-3 control-label">Phone Number</label>
           <div class="col-sm-9">
-            <input type="text" placeholder="phone number" class="form-control" value.bind="contact.phoneNumber">
+            <input type="text" placeholder="phone number" class="form-control re-validate" value.bind="contact.phoneNumber">
+          </div>
+        </div>
+
+        <div class="form-group has-error">
+          <div class="col-sm-12">
+            <span class="help-block text-center">
+              ${errMsg}
+            </span>                      
           </div>
         </div>
 

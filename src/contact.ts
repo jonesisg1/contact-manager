@@ -1,3 +1,6 @@
+/*
+ *  IJ170916 Added enetity validation - Email or Phone.
+ */
 import {ValidationRules} from 'aurelia-validation';
 import {log} from './log';
 
@@ -28,9 +31,16 @@ export class Contact {
     return new Contact(newContact);
   }
 }
-  
+
+ValidationRules.customRule(
+  'oneContact',
+  (value, obj) => obj.email || obj.phoneNumber,
+  'You must enter either an Email or Phone Number.'
+);
+
 ValidationRules
   .ensure('firstName').required()
   .ensure('lastName').required().minLength(2)
-  .ensure('email').required().email()
+  .ensure('email').email()
+  .ensureObject().satisfiesRule('oneContact')
   .on(Contact);
