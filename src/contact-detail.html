@@ -50,7 +50,7 @@
 
         <div class="form-group has-error">
           <div class="col-sm-12">
-            <span class="help-block text-center">
+            <span class="help-block text-center" repeat.for="errMsg of entityErrors">
               ${errMsg}
             </span>                      
           </div>

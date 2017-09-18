@@ -21,7 +21,7 @@ export class ContactDetail {
   contact: Contact;
   originalContact: Contact;
   hasFocusFirstName;
-  errMsg: String;
+  entityErrors: Array<String> = [];
   
   constructor(private api: WebAPI, 
               private ea: EventAggregator,
@@ -31,13 +31,11 @@ export class ContactDetail {
     
     this.handleFocusout = e => {
       log.debug(e.target.tagName + ', ' + e.relatedTarget.tagName + ', '+ this.valCtl.errors.length);
-      if (e.target.className.split(' ').indexOf('re-validate') > 0 
-        //  && e.relatedTarget.className.split(' ').indexOf('btn-success') < 0
-      ) {
+      if (e.target.className.split(' ').indexOf('re-validate') > 0 ) {
         this.valCtl.validate()
           .then(valCtlResult => {
-            log.debug('ContactDetail.handleFocusout - Num Errors:' + this.valCtl.errors.length)
-            this.showErrors(valCtlResult.results);
+            log.debug('ContactDetail.handleFocusout - Num Errors:' + this.valCtl.errors.length);
+            this.setEntityErrors(valCtlResult.results);
           })
       } 
     }
@@ -48,12 +46,12 @@ export class ContactDetail {
     //https://ilikekillnerds.com/2016/02/using-event-listeners-in-aurelia/
   }
 
-  private showErrors(errors) {
-    errors.forEach(e => {
-      this.errMsg = '';
-      if (!e.valid && e.propertyName === null) {
-        log.debug(e.id + ', ' + e.message + ',' + e.propertyName);
-        this.errMsg = e.message;
+  private setEntityErrors(validationResults) {
+    this.entityErrors = [];
+    validationResults.forEach(result => {    
+      if (!result.valid && result.propertyName === null) {
+        log.debug(result.id + ', ' + result.message + ',' + result.propertyName);
+        this.entityErrors.push(result.message);
       }
     })
   }
@@ -68,25 +66,31 @@ export class ContactDetail {
 
   activate(params, routeConfig) {
     this.routeConfig = routeConfig; 
-    this.errMsg = '';
     log.debug('ContactDetail.activate - routeConfig.name:' + this.routeConfig.name);
-    log.debug('ContactDetail.activate - Num Errors:' + this.valCtl.errors.length)
-    
+    log.debug('ContactDetail.activate - Num Errors:' + this.valCtl.errors.length);
     if(this.routeConfig.name == 'new') {
       this.doInit(new Contact());
-      this.hasFocusFirstName = true;
+      this.ea.publish(new ContactViewed(this.contact));
+      this.hasFocusFirstName = true; 
     } else {
       return this.api.getContactDetails(params.id)
-        .then(contact => this.doInit(new Contact(contact)));
+        .then(contact => {
+          this.doInit(new Contact(contact));
+          this.ea.publish(new ContactViewed(this.contact)); 
+        });
     }
   }
-
+  
   private doInit(contact:Contact) {
+    if (this.contact) {
+      this.valCtl.removeObject(this.contact);  
+    } else {
+      log.debug('ContactDetail.doInit - contact not yet set!')
+    }
     this.contact = contact;
     this.valCtl.addObject(this.contact);
     this.originalContact = this.contact.clone();
-    this.routeConfig.navModel.setTitle(this.contact.firstName || 'New');
-    this.ea.publish(new ContactViewed(this.contact));  
+    this.routeConfig.navModel.setTitle(this.contact.firstName || 'New'); 
   }
 
   get canSave() {
@@ -102,27 +106,22 @@ export class ContactDetail {
     this.contact = this.originalContact.clone(); // Remember we want a different object!
     this.valCtl.addObject(this.contact);
     this.valCtl.reset(); // Assume the original state was valid.
-    this.errMsg = '';
+    this.entityErrors = [];
   }
   
   save() {
     log.debug('ContactDetail.save');
     this.valCtl.validate()
       .then(valCtlResult => {
-        log.debug('ContactDetail.save - Num Errors:' + this.valCtl.errors.length)
+        log.debug('ContactDetail.save - Num Errors:' + this.valCtl.errors.length);
         if(valCtlResult.valid) {
-          this.errMsg = '';
           this.api.saveContact(this.contact)
             .then(contact => {
-              this.valCtl.removeObject(this.contact);
-              this.contact = new Contact(contact);
-              this.valCtl.addObject(this.contact);
-              this.originalContact = this.contact.clone();
-              this.routeConfig.navModel.setTitle(this.contact.firstName);
+              this.doInit(new Contact(contact));
               this.ea.publish(new ContactUpdated(this.contact));
             });
         } else {
-          this.showErrors(valCtlResult.results);
+          this.setEntityErrors(valCtlResult.results);
         };
       });
   }
